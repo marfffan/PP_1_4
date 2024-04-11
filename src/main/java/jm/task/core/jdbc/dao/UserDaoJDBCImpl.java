@@ -47,6 +47,7 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
         }
+        System.out.println("User с именем — " + name);
     }
 
     public void removeUserById(long id) throws SQLException {
