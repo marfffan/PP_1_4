@@ -6,11 +6,12 @@ import jm.task.core.jdbc.util.Util;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 //dao - пакет dao (Data Access Object), содержит классы, отвечающие за взаимодействие с базой данных.
-public class UserDaoJDBCImpl implements UserDao {
+public class UserDaoJDBCImpl extends Util implements UserDao {
 
-    private static Connection connection = Util.getConnection();
+    private static Connection connection = getConnection();
 
     //Конструктор без парамметров
     public UserDaoJDBCImpl() {
@@ -18,15 +19,14 @@ public class UserDaoJDBCImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-
         try (Statement statCreateTeble = connection.createStatement()) {
             String sqlCreateTeble = "CREATE TABLE IF NOT EXISTS users(id bigint AUTO_INCREMENT PRIMARY KEY, name varchar(100) NOT NULL, lastName varchar(100) NOT NULL, age tinyint DEFAULT 0)";
             statCreateTeble.executeUpdate(sqlCreateTeble);
-            System.out.println("Создали таблицу");
         } catch (SQLException e) {
-            System.out.println("Не удалось создать таблицу");
+            e.printStackTrace();
         }
     }
+
 
 
     public void dropUsersTable() {
@@ -39,43 +39,56 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
-    public void saveUser(String name, String lastName, byte age) throws SQLException {
+    public void saveUser(String name, String lastName, byte age){
         String sqlSaveUser = "INSERT INTO users (name, lastName, age) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        System.out.println("User с именем — " + name);
     }
 
-    public void removeUserById(long id) throws SQLException {
+    public void removeUserById(long id) {
         String sqlRemoveUserById = "DELETE FROM users WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlRemoveUserById)) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
 
-    public List<User> getAllUsers() throws SQLException {
-        List<User> users = new ArrayList<>();
-        Statement st = connection.createStatement();
-        ResultSet rs = st.executeQuery("SELECT * FROM users");
-
-        while (rs.next()) {
-            String name = rs.getString("name");
-            String lastName = rs.getString("lastName");
-            Byte age = rs.getByte("age");
-            users.add(new User(name, lastName, age));
+    public List<User> getAllUsers() {
+        String sql = "SELECT * FROM users";
+        List<User> userList = new ArrayList<>();
+        // Оборачиваем Ststement и resultset в try с ресурсами для автоматического закрытия
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery(sql)) {
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getLong("id"));
+                user.setName(resultSet.getString("name"));
+                user.setLastName(resultSet.getString("lastName"));
+                user.setAge(resultSet.getByte("age"));
+                userList.add(user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка возврата пользователей", e);
         }
-
-        st.close();
-        return users;
+        return userList;
     }
 
     public void cleanUsersTable() {
+        try (Statement statCleanTable = connection.createStatement()) {
+            String sqlCleanTable = "TRUNCATE TABLE users";
+            statCleanTable.executeUpdate(sqlCleanTable);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 }
