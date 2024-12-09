@@ -7,11 +7,9 @@ import jm.task.core.jdbc.model.User;
 import java.sql.SQLException;
 import java.util.List;
 
-//service - пакет service, содержит сервисные классы,
-// которые обрабатывают бизнес-логику приложения. Все, что
-// нам нужно от идеи приложения, вся логика, мы прописываем здесь,
 public class UserServiceImpl implements UserService {
-    UserDao userDaoJDBC = new UserDaoJDBCImpl();
+    /**Использую обект Dao в серивисе полиморфизм наше всё*/
+    private static UserDao userDaoJDBC = new UserDaoJDBCImpl();
 
     @Override
     public void createUsersTable() {
@@ -24,8 +22,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    /**После каждого добавления вывод в консоль (User с именем — name добавлен в базу данных) - реализован в сервисе;*/
     public void saveUser(String name, String lastName, byte age) {
         userDaoJDBC.saveUser(name, lastName, age);
+        System.out.println("User с " + name +" — добавлен в базу данных");
     }
 
 

@@ -6,14 +6,12 @@ import jm.task.core.jdbc.util.Util;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-//dao - пакет dao (Data Access Object), содержит классы, отвечающие за взаимодействие с базой данных.
+
 public class UserDaoJDBCImpl extends Util implements UserDao {
 
     private static Connection connection = getConnection();
 
-    //Конструктор без парамметров
     public UserDaoJDBCImpl() {
     }
 
@@ -26,12 +24,10 @@ public class UserDaoJDBCImpl extends Util implements UserDao {
             e.printStackTrace();
         }
     }
-
-
-
+/**Удаление таблицы теперь проверяет существует ли таблица и если да то удаляет её*/
     public void dropUsersTable() {
         try (Statement statDropTable = connection.createStatement()) {
-            String sqlDropTable = "DROP TABLE users";
+            String sqlDropTable = "DROP TABLE IF EXISTS users";
             statDropTable.executeUpdate(sqlDropTable);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -65,7 +61,6 @@ public class UserDaoJDBCImpl extends Util implements UserDao {
     public List<User> getAllUsers() {
         String sql = "SELECT * FROM users";
         List<User> userList = new ArrayList<>();
-        // Оборачиваем Ststement и resultset в try с ресурсами для автоматического закрытия
         try (PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery(sql)) {
             while (resultSet.next()) {
@@ -89,6 +84,5 @@ public class UserDaoJDBCImpl extends Util implements UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
