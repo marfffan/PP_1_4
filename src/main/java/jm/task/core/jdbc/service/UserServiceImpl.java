@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
     /**Использую обект Dao в серивисе полиморфизм наше всё*/
-    private static UserDao userDaoJDBC = new UserDaoJDBCImpl();
+    private UserDao userDaoJDBC = new UserDaoJDBCImpl();
 
     @Override
     public void createUsersTable() {

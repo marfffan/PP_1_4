@@ -7,10 +7,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jm.task.core.jdbc.util.Util.getConnection;
 
-public class UserDaoJDBCImpl extends Util implements UserDao {
 
-    private static Connection connection = getConnection();
+public class UserDaoJDBCImpl implements UserDao {
+/**Подправил конекшен и больше Dao не наследуется от утилитного метода*/
+    private Connection connection = getConnection();
 
     public UserDaoJDBCImpl() {
     }
